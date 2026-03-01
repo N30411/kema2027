@@ -53,7 +53,7 @@ export default function SupportersPage() {
         }
         const { data, error } = await supabase
           .from("supporters")
-          .select("id, full_name, phone, ward:ward_id, support_level");
+          .select("id, full_name, phone, support_level, ward:ward_id(id, name)");
         if (error) throw error;
         setSupporters(data || []);
       } catch (err: any) {
@@ -134,7 +134,7 @@ export default function SupportersPage() {
                   >
                     <td className="px-4 py-3 text-white">{supporter.full_name}</td>
                     <td className="px-4 py-3 text-gray-400">{supporter.phone}</td>
-                    <td className="px-4 py-3 text-gray-400">{supporter.ward}</td>
+                    <td className="px-4 py-3 text-gray-400">{supporter.ward?.name || ''}</td>
                     <td className={`px-4 py-3 font-semibold ${getSupportLevelColor(supporter.support_level)}`}>
                       {supporter.support_level}
                     </td>
