@@ -36,6 +36,9 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const supabase = getSupabaseClient();
+      if (!supabase) {
+        throw new Error("Supabase client is null");
+      }
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
