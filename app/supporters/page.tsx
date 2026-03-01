@@ -14,6 +14,31 @@ export default function SupportersPage() {
   const [supporters, setSupporters] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    setShowDeleteModal(false);
+    setIsLoading(true);
+    setError("");
+    try {
+      const supabase = getSupabaseClient();
+      if (!supabase) {
+        setError("Supabase client not initialized");
+        setIsLoading(false);
+        setDeletingId(null);
+        return;
+      }
+      const { error } = await supabase.from("supporters").delete().eq("id", id);
+      if (error) throw error;
+      setSupporters((prev) => prev.filter((s) => s.id !== id));
+    } catch (err: any) {
+      setError("Failed to delete supporter.");
+    } finally {
+      setIsLoading(false);
+      setDeletingId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchSupporters = async () => {
@@ -123,7 +148,15 @@ export default function SupportersPage() {
                           <Edit2 size={16} />
                         </Button>
                       </Link>
-                      <Button variant="danger" size="sm" disabled>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => {
+                          setDeletingId(supporter.id);
+                          setShowDeleteModal(true);
+                        }}
+                        disabled={isLoading && deletingId === supporter.id}
+                      >
                         <Trash2 size={16} />
                       </Button>
                     </td>
@@ -134,6 +167,23 @@ export default function SupportersPage() {
           </div>
         )}
       </Card>
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-navy-700 rounded-lg p-6 w-full max-w-md shadow-lg">
+            <h2 className="text-lg font-semibold text-white mb-4">Delete Supporter</h2>
+            <p className="mb-6 text-gray-300">Are you sure you want to delete this supporter? This action cannot be undone.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => setShowDeleteModal(false)} disabled={isLoading}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={() => deletingId && handleDelete(deletingId)} disabled={isLoading}>
+                {isLoading ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppLayout>
   )
 }
