@@ -9,12 +9,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       if (pathname === "/login") return;
-      const supabase = getSupabaseClient();
-      const session = supabase.auth.getSession ? (await supabase.auth.getSession()).data.session : null;
-      const { data, error } = await supabase.auth.getUser();
-      if (error || !data?.user || !session) {
-        router.replace("/login");
-      }
+        const supabase = getSupabaseClient();
+        if (!supabase) {
+          router.replace("/login");
+          return;
+        }
+        const session = supabase.auth.getSession ? (await supabase.auth.getSession()).data.session : null;
+        const { data, error } = await supabase.auth.getUser();
+        if (error || !data?.user || !session) {
+          router.replace("/login");
+        }
     };
     checkAuth();
   }, [pathname, router]);
