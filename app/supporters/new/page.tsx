@@ -62,14 +62,31 @@ export default function NewSupporterPage() {
     try {
       const supabase = getSupabaseClient();
       if (!supabase) return;
-      // TODO: Replace with real user id from auth/session
-      const registered_by = "00000000-0000-0000-0000-000000000000";
+      // Get authenticated user
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData?.user) {
+        alert("You must be logged in to create a supporter.");
+        setIsLoading(false);
+        return;
+      }
+      const registered_by = userData.user.id;
       const supporter: Supporter = { ...formData, registered_by };
-      const { error } = await (supabase.from("supporters") as any).insert([supporter]);
+      // Basic validation: check required fields
+      if (!supporter.full_name || !supporter.ward_id || !supporter.phone) {
+        console.error("Missing required fields", supporter);
+        alert("Please fill in all required fields.");
+        setIsLoading(false);
+        return;
+      }
+      const { data, error } = await (supabase as any)
+        .from("supporters")
+        .insert([supporter]);
+      console.log("Supabase response:", { data, error, supporter });
       if (error) throw error;
       router.push("/supporters");
     } catch (error) {
       console.error("Error creating supporter:", error);
+      alert("Error creating supporter. See console for details.");
     } finally {
       setIsLoading(false);
     }

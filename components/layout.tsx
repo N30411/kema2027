@@ -157,11 +157,11 @@ export function AppLayout({ children, title }: LayoutProps) {
   return (
     <div className="flex min-h-screen bg-navy-900">
       <Sidebar />
-      <main className="flex-1 pt-4 px-4 lg:pt-0">
-        <div className="max-w-7xl mx-auto">
+      <main className="flex-1 pt-4 px-2 sm:px-4 lg:pt-0">
+        <div className="max-w-7xl mx-auto w-full">
           {title && (
             <div className="mb-6 pt-12 lg:pt-6">
-              <h1 className="text-3xl font-bold text-white">{title}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">{title}</h1>
             </div>
           )}
           {children}

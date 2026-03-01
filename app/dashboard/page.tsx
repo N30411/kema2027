@@ -93,7 +93,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard
             label="Total Supporters"
             value={stats.total_supporters}
@@ -126,7 +126,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
         {/* Support Level Distribution */}
         <Card>
           <h3 className="mb-4 text-lg font-semibold text-white flex items-center">
@@ -262,7 +262,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Supporter Map */}
-        <Card className="lg:col-span-2 mt-6">
+        <Card className="w-full mt-6 overflow-x-auto lg:col-span-2">
           <h3 className="mb-4 text-lg font-semibold text-white flex items-center">
             Supporter Distribution Map
             <span className="ml-2 text-xs bg-green-700 px-2 py-1 rounded animate-pulse">Updating</span>
@@ -271,19 +271,19 @@ export default function DashboardPage() {
         </Card>
 
         {/* Quick Actions Panel */}
-        <Card className="mt-6">
+        <Card className="mt-6 w-full">
           <h3 className="mb-4 text-lg font-semibold text-white flex items-center">
             Quick Actions
             <span className="ml-2 text-xs bg-green-700 px-2 py-1 rounded animate-pulse">Active</span>
           </h3>
-          <div className="flex flex-wrap gap-4">
-            <button className="bg-gold-500 text-navy-900 font-bold px-6 py-3 rounded-lg shadow hover:bg-gold-400 transition animate-pulse">
+          <div className="flex flex-wrap gap-4 w-full">
+            <button className="bg-gold-500 text-navy-900 font-bold px-6 py-3 rounded-lg shadow hover:bg-gold-400 transition animate-pulse w-full sm:w-auto">
               Send SMS Blast
             </button>
-            <button className="bg-navy-700 text-gold-500 font-bold px-6 py-3 rounded-lg shadow hover:bg-navy-600 transition animate-pulse">
+            <button className="bg-navy-700 text-gold-500 font-bold px-6 py-3 rounded-lg shadow hover:bg-navy-600 transition animate-pulse w-full sm:w-auto">
               Schedule Event
             </button>
-            <button className="bg-green-600 text-white font-bold px-6 py-3 rounded-lg shadow hover:bg-green-500 transition animate-pulse">
+            <button className="bg-green-600 text-white font-bold px-6 py-3 rounded-lg shadow hover:bg-green-500 transition animate-pulse w-full sm:w-auto">
               Assign Agent
             </button>
           </div>

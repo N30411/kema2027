@@ -31,34 +31,26 @@ export default function LoginPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
-
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
     try {
-      // In production, this would call a server action to authenticate with Supabase
-      // For now, this is a placeholder showing the structure
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Login failed")
+      const supabase = getSupabaseClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error || !data?.user) {
+        throw new Error(error?.message || "Login failed");
       }
-
       // Redirect to dashboard on successful login
-      router.push("/dashboard")
+      router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  } 
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-navy px-4">
