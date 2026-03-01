@@ -56,6 +56,7 @@ const supporterGrowthData = [
 export default function DashboardPage() {
   const [stats, setStats] = useState(initialStats)
   const [llgData, setLlgData] = useState(initialLlgData)
+  const [showProfile, setShowProfile] = useState(false)
 
   useEffect(() => {
     const fetchLlgData = async () => {
@@ -63,7 +64,6 @@ export default function DashboardPage() {
       if (!supabase) return;
       const { data, error } = await supabase.from('llgs').select('*, wards')
       if (!error && data) {
-        // Ensure wards property exists
         const llgDataWithWards: LLGWithWards[] = data.map((llg: any) => ({ ...llg, wards: llg.wards ?? 0 }))
         setLlgData(llgDataWithWards)
         setStats((prev) => ({
@@ -77,49 +77,75 @@ export default function DashboardPage() {
 
   return (
     <AppLayout title="Campaign Dashboard - Morobe Regional Election 2027">
-      <div className="mb-6 flex justify-end">
-        <a
-          href="/info/population"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded transition"
-        >
-          Morobe Population & Stats
-        </a>
+      {/* Header with avatar and notifications */}
+      <div className="flex items-center justify-between mb-8 px-2">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent drop-shadow-lg">Dashboard</h1>
+          <span className="ml-2 px-3 py-1 rounded-full bg-navy-800/60 text-xs text-gold-400 font-semibold shadow animate-pulse">LIVE</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <button title="Notifications" className="relative p-2 rounded-full bg-navy-700 hover:bg-navy-600 transition shadow-lg">
+            <svg className="w-6 h-6 text-gold-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+          </button>
+          <div className="relative">
+            <button onClick={() => setShowProfile((v) => !v)} className="flex items-center gap-2 p-2 rounded-full bg-navy-700 hover:bg-navy-600 transition shadow-lg">
+              <img src="/profile/avatar.png" alt="Profile" className="w-8 h-8 rounded-full border-2 border-gold-400 shadow" />
+              <span className="hidden sm:block text-gold-400 font-semibold">Admin</span>
+            </button>
+            {showProfile && (
+              <div className="absolute right-0 mt-2 w-48 bg-navy-800/90 rounded-lg shadow-xl p-4 z-50 border border-navy-600">
+                <div className="flex items-center gap-2 mb-2">
+                  <img src="/profile/avatar.png" alt="Profile" className="w-10 h-10 rounded-full border-2 border-gold-400" />
+                  <div>
+                    <div className="font-bold text-gold-400">Admin</div>
+                    <div className="text-xs text-gray-400">admin@morobe2027.com</div>
+                  </div>
+                </div>
+                <hr className="border-navy-600 my-2" />
+                <button className="w-full text-left text-sm text-red-400 hover:text-red-300 font-semibold py-1">Logout</button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
       {/* Real-time Status Bar */}
       <div className="mb-6 flex items-center gap-4 animate-pulse">
         <span className="bg-green-500 rounded-full w-3 h-3 mr-2"></span>
         <span className="text-green-400 font-semibold">LIVE</span>
         <span className="text-gray-400">Last update: just now</span>
+        <a href="/info/population" className="ml-auto btn-primary shadow-lg">Morobe Population & Stats</a>
       </div>
 
       {/* Stats Cards */}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <StatCard
-            label="Total Supporters"
-            value={stats.total_supporters}
-            icon={<MapPin size={24} className="animate-bounce" />} // animated icon
-          />
-          <StatCard
-            label="Strong Supporters"
-            value={stats.strong_supporters}
-            icon={<MapPin size={24} className="animate-pulse" />} // animated icon
-            trend={stats.strong_supporters.toString()}
-            trendUp={true}
-          />
+        <StatCard
+          label="Total Supporters"
+          value={stats.total_supporters}
+          icon={<MapPin size={24} className="animate-bounce" />}
+        />
+        <StatCard
+          label="Strong Supporters"
+          value={stats.strong_supporters}
+          icon={<MapPin size={24} className="animate-pulse" />}
+          trend={stats.strong_supporters.toString()}
+          trendUp={true}
+        />
         <StatCard
           label="Campaign Agents"
           value={stats.total_agents}
-          icon={<Users size={24} className="animate-spin" />} // animated icon
+          icon={<Users size={24} className="animate-spin" />}
         />
         <StatCard
           label="Total Wards"
           value={stats.total_wards}
-          icon={<MapPin size={24} className="animate-bounce" />} // animated icon
+          icon={<MapPin size={24} className="animate-bounce" />}
         />
         <StatCard
           label="Weekly Growth"
           value={`${stats.weekly_growth_percentage}%`}
-          icon={<TrendingUp size={24} className="animate-pulse" />} // animated icon
+          icon={<TrendingUp size={24} className="animate-pulse" />}
           trend="vs last week"
           trendUp={true}
         />
@@ -128,8 +154,9 @@ export default function DashboardPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
         {/* Support Level Distribution */}
-        <Card>
+        <Card className="glass-card">
           <h3 className="mb-4 text-lg font-semibold text-white flex items-center">
+            <svg className="w-5 h-5 mr-2 text-green-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2a4 4 0 014-4h2a4 4 0 014 4v2" /></svg>
             Support Level Distribution
             <span className="ml-2 text-xs bg-green-700 px-2 py-1 rounded animate-pulse">Updating</span>
           </h3>
@@ -140,9 +167,7 @@ export default function DashboardPage() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, value }) =>
-                  `${name}: ${value}`
-                }
+                label={({ name, value }) => `${name}: ${value}`}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
@@ -157,8 +182,9 @@ export default function DashboardPage() {
         </Card>
 
         {/* Gender Distribution */}
-        <Card>
+        <Card className="glass-card">
           <h3 className="mb-4 text-lg font-semibold text-white flex items-center">
+            <svg className="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1" /></svg>
             Gender Distribution
             <span className="ml-2 text-xs bg-green-700 px-2 py-1 rounded animate-pulse">Updating</span>
           </h3>
@@ -169,9 +195,7 @@ export default function DashboardPage() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, value }) =>
-                  `${name}: ${value}`
-                }
+                label={({ name, value }) => `${name}: ${value}`}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
@@ -186,8 +210,9 @@ export default function DashboardPage() {
         </Card>
 
         {/* Supporters by LLG */}
-        <Card className="lg:col-span-2">
+        <Card className="glass-card lg:col-span-2">
           <h3 className="mb-4 text-lg font-semibold text-white flex items-center">
+            <svg className="w-5 h-5 mr-2 text-gold-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18" /></svg>
             Supporters by LLG
             <span className="ml-2 text-xs bg-green-700 px-2 py-1 rounded animate-pulse">Updating</span>
           </h3>
@@ -204,7 +229,6 @@ export default function DashboardPage() {
                 dataKey="name"
                 stroke="#9ca3af"
                 tick={(props) => {
-                  // Remove verticalAnchor and other unknown props
                   const { x, y, payload } = props as { x: number; y: number; payload: { value: string } };
                   return (
                     <text
@@ -223,12 +247,7 @@ export default function DashboardPage() {
                 height={80}
               />
               <YAxis type="number" stroke="#9ca3af" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1a3a52",
-                  border: "1px solid #0f2438",
-                }}
-              />
+              <Tooltip contentStyle={{ backgroundColor: "#1a3a52", border: "1px solid #0f2438" }} />
               <Legend />
               <Bar dataKey="Strong" stackId="a" fill="#10b981" radius={[8, 8, 8, 8]} />
               <Bar dataKey="Leaning" stackId="a" fill="#f59e0b" radius={[8, 8, 8, 8]} />
@@ -239,8 +258,9 @@ export default function DashboardPage() {
         </Card>
 
         {/* Real-time Supporter Growth */}
-        <Card className="lg:col-span-2">
+        <Card className="glass-card lg:col-span-2">
           <h3 className="mb-4 text-lg font-semibold text-white flex items-center">
+            <svg className="w-5 h-5 mr-2 text-green-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 17l6-6 4 4 8-8" /></svg>
             Real-time Supporter Growth
             <span className="ml-2 text-xs bg-green-700 px-2 py-1 rounded animate-pulse">Updating</span>
           </h3>
@@ -249,12 +269,7 @@ export default function DashboardPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="week" stroke="#9ca3af" />
               <YAxis stroke="#9ca3af" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1a3a52",
-                  border: "1px solid #0f2438",
-                }}
-              />
+              <Tooltip contentStyle={{ backgroundColor: "#1a3a52", border: "1px solid #0f2438" }} />
               <Legend />
               <Line type="monotone" dataKey="supporters" stroke="#10b981" strokeWidth={3} dot={{ r: 6 }} />
             </LineChart>
@@ -262,8 +277,9 @@ export default function DashboardPage() {
         </Card>
 
         {/* Supporter Map */}
-        <Card className="w-full mt-6 overflow-x-auto lg:col-span-2">
+        <Card className="glass-card w-full mt-6 overflow-x-auto lg:col-span-2">
           <h3 className="mb-4 text-lg font-semibold text-white flex items-center">
+            <svg className="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1" /></svg>
             Supporter Distribution Map
             <span className="ml-2 text-xs bg-green-700 px-2 py-1 rounded animate-pulse">Updating</span>
           </h3>
@@ -271,19 +287,23 @@ export default function DashboardPage() {
         </Card>
 
         {/* Quick Actions Panel */}
-        <Card className="mt-6 w-full">
+        <Card className="glass-card mt-6 w-full">
           <h3 className="mb-4 text-lg font-semibold text-white flex items-center">
+            <svg className="w-5 h-5 mr-2 text-gold-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
             Quick Actions
             <span className="ml-2 text-xs bg-green-700 px-2 py-1 rounded animate-pulse">Active</span>
           </h3>
           <div className="flex flex-wrap gap-4 w-full">
-            <button className="bg-gold-500 text-navy-900 font-bold px-6 py-3 rounded-lg shadow hover:bg-gold-400 transition animate-pulse w-full sm:w-auto">
+            <button className="btn-primary flex items-center gap-2 animate-pulse w-full sm:w-auto" title="Send SMS Blast">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
               Send SMS Blast
             </button>
-            <button className="bg-navy-700 text-gold-500 font-bold px-6 py-3 rounded-lg shadow hover:bg-navy-600 transition animate-pulse w-full sm:w-auto">
+            <button className="btn-secondary flex items-center gap-2 animate-pulse w-full sm:w-auto" title="Schedule Event">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               Schedule Event
             </button>
-            <button className="bg-green-600 text-white font-bold px-6 py-3 rounded-lg shadow hover:bg-green-500 transition animate-pulse w-full sm:w-auto">
+            <button className="bg-green-600 text-white font-bold px-6 py-3 rounded-lg shadow hover:bg-green-500 transition animate-pulse w-full sm:w-auto flex items-center gap-2" title="Assign Agent">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
               Assign Agent
             </button>
           </div>
@@ -291,7 +311,7 @@ export default function DashboardPage() {
       </div>
 
       {/* AI Insights Section */}
-      <Card className="mt-6">
+      <Card className="glass-card mt-6">
         <h3 className="mb-4 text-lg font-semibold text-white">
           AI Insights for 2027 Election
         </h3>
@@ -309,7 +329,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Recent Activity */}
-      <Card className="mt-6">
+      <Card className="glass-card mt-6">
         <h3 className="mb-4 text-lg font-semibold text-white">
           Recent Activity
         </h3>
